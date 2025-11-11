@@ -1,11 +1,14 @@
+# -*- coding: utf-8 -*-
+
 import streamlit as st
 import numpy as np
 import joblib
 from pathlib import Path
 
-st.set_page_config(page_title="Crop Recommendation", page_icon="??", layout="centered")
+# ---------- page config ----------
+st.set_page_config(page_title="Crop Recommendation", page_icon="🌾", layout="centered")
 
-st.title("?? Crop Recommendation")
+st.title("🌾 Crop Recommendation")
 st.caption("Uses your RandomForest + MinMaxScaler + StandardScaler exactly like your Flask app.")
 
 # ---------- file paths ----------
@@ -27,7 +30,7 @@ except Exception as e:
     st.error(f"Failed to load artifacts. Make sure model files exist under /model. Error: {e}")
     st.stop()
 
-# ---------- the same class mapping you used ----------
+# ---------- crop mapping ----------
 crop_dict = {
     1: "Rice", 2: "Maize", 3: "Jute", 4: "Cotton", 5: "Coconut", 6: "Papaya", 7: "Orange",
     8: "Apple", 9: "Muskmelon", 10: "Watermelon", 11: "Grapes", 12: "Mango", 13: "Banana",
@@ -44,7 +47,7 @@ with col1:
     K = st.number_input("Potassium (K)", min_value=0.0, max_value=300.0, value=43.0, step=1.0)
     ph = st.number_input("pH", min_value=0.0, max_value=14.0, value=6.5, step=0.1)
 with col2:
-    temp = st.number_input("Temperature (�C)", min_value=-10.0, max_value=60.0, value=24.0, step=0.1)
+    temp = st.number_input("Temperature (\u00B0C)", min_value=-10.0, max_value=60.0, value=24.0, step=0.1)
     humidity = st.number_input("Humidity (%)", min_value=0.0, max_value=100.0, value=65.0, step=0.1)
     rainfall = st.number_input("Rainfall (mm)", min_value=0.0, max_value=5000.0, value=100.0, step=0.1)
 
@@ -65,19 +68,20 @@ if st.button("Recommend Crop"):
         else:
             st.warning("Sorry, could not map the predicted class to a crop name.")
 
-        # optional: probabilities if available
+        # optional: show prediction probability if available
         try:
             proba = model.predict_proba(final_features)[0]
-            # find the predicted class index in model.classes_
             if hasattr(model, "classes_"):
-                # classes_ might be [1..22]; map index of predicted class to its probability
                 class_index = list(model.classes_).index(y)
                 st.write(f"Model confidence: {proba[class_index]:.2%}")
         except Exception:
             pass
 
         st.caption("Inputs used (in model order): N, P, K, temperature, humidity, pH, rainfall.")
-        st.write({ "N": N, "P": P, "K": K, "temperature": temp, "humidity": humidity, "ph": ph, "rainfall": rainfall })
+        st.write({
+            "N": N, "P": P, "K": K, "temperature": temp,
+            "humidity": humidity, "ph": ph, "rainfall": rainfall
+        })
 
     except Exception as e:
         st.error(f"Prediction failed: {e}")
